@@ -48,6 +48,7 @@ var taskFormHandler = function(event) {
 
  
   var createTaskEl = function(taskDataObj){
+
      //create list item
   var listItemEl = document.createElement("li"); 
   listItemEl.className = "task-item"; 
@@ -69,12 +70,30 @@ var taskFormHandler = function(event) {
   var taskActionsEl = createTaskActions(taskIdCounter);
   listItemEl.appendChild(taskActionsEl);
 
-  // add entire list item to list
-  tasksToDoEl.appendChild(listItemEl);
+  switch (taskDataObj.status) {
+    case "to do":
+      taskActionsEl.querySelector("select[name='status-change']").selectedIndex = 0;
+      tasksToDoEl.append(listItemEl);
+      break;
+    case "in progress":
+      taskActionsEl.querySelector("select[name='status-change']").selectedIndex = 1;
+      tasksInProgressEl.append(listItemEl);
+      break;
+    case "completed":
+      taskActionsEl.querySelector("select[name='status-change']").selectedIndex = 2;
+      tasksCompletedEl.append(listItemEl);
+      break;
+    default:
+      console.log("Something went wrong!");
+  }
+
 
   taskDataObj.id = taskIdCounter;
 
+
   tasks.push(taskDataObj);
+ 
+  
 
   saveTasks();
 
@@ -247,6 +266,30 @@ var taskFormHandler = function(event) {
       localStorage.setItem("tasks", JSON.stringify(tasks));
   }
 
+  var loadTasks = function(){
+      //gets task items from localStorage
+        var savedTasks = localStorage.getItem("tasks");
+
+        if (!savedTasks){
+            return false;
+        }
+
+      //converts tasks from string  back to an array of objcts
+      savedTasks = JSON.parse(savedTasks);
+
+      //loop through savedTasks array
+
+      for ( var i = 0; i < savedTasks.length; i++) {
+          // pass each task object into the createTaskEl function
+          createTaskEl(savedTasks[i]);
+          
+      }
+
+    console.log(savedTasks);
+  };
+
   formEl.addEventListener("submit", taskFormHandler);
   pageContentEl.addEventListener("click", taskButtonHandler);
   pageContentEl.addEventListener("change", taskStatusChangeHandler);
+
+  loadTasks();
